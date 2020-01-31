@@ -19,6 +19,10 @@ public class Ship : MonoBehaviour
     Animator[] animators;
     public bool IsWithIn = false;
     public Vector2 CellCenterPos;
+    bool IsWasLocatedOnse= false;
+    Vector2 LastPosition;
+    Orientation LastOrentation;
+
 
     // Start is called before the first frame update
     void Start()
@@ -75,6 +79,23 @@ public class Ship : MonoBehaviour
         {
             Rotate();
         }
+        else if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            if (IsWasLocatedOnse)
+            {
+                
+                transform.position = LastPosition;
+                Dispatcher.currentShip = null;
+                if (orientation!=LastOrentation)
+                {
+                    Rotate();
+                }
+                else 
+                {
+                    Destroy(gameObject);
+                }
+            }
+        }
         SwitchErrorAnimation();
     }
 
@@ -95,7 +116,22 @@ public class Ship : MonoBehaviour
 
     void OnFloorClick()
     {
+        //Debug.Log("KEK");
+        if (!Input.GetMouseButtonUp(0))
+        {
+            return;
+        }
+        else if (toMove && IsPositionCorrect)
+        {
+            LastPosition = transform.position;
+            LastOrentation = orientation;
+        }
         dispatcher.OnShipClick();
+        if (!IsWasLocatedOnse)
+        {
+            IsWasLocatedOnse = true;
+        }
+        
     }
 
 }

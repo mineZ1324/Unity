@@ -58,9 +58,10 @@ public class GameField : MonoBehaviour
         var UpperRightCorner = UpperRightCells.max;
         bool IsOverField = mousePos.x>BottomLeftCorner.x && mousePos.y>BottomLeftCorner.y && mousePos.x<UpperRightCorner.x && mousePos.y<UpperRightCorner.y;
 
-        if (!IsOverField)
+        if (!IsOverField)//Кораблик за пределами поля
         {
             ship.IsPositionCorrect = false;
+            ship.IsWithIn = false;
             return;
         }
         var dx = mousePos.x-BottomLeftCorner.x;

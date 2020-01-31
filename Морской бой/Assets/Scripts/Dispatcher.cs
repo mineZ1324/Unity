@@ -18,14 +18,40 @@ public class Dispatcher : MonoBehaviour
         {
             shipsLeftToAllocate.Add(gameObject.name, shipsToAllocate);
         }
+        FillLabelsDict();
     }
 
     public void OnShipClick()
-    {
-        if (currentShip == null) // Обычный шаблон
+    {   
+        if (gameObject.name.Contains("Clone"))
+        {
+            
+            if (currentShip == null)
+            {
+                currentShip = GetComponentInChildren<Ship>();
+            }
+            else if (currentShip.IsPositionCorrect)
+            {
+                currentShip = null;
+            }
+        }
+        else if (currentShip == null) // Обычный шаблон
         {
             var shipObjToPlay = Instantiate(shipPrefab, transform.parent.transform);
             currentShip = shipObjToPlay.GetComponentInChildren<Ship>();
         }
+    }
+    void FillLabelsDict()
+    {
+        var Labels = transform.parent.GetComponentsInChildren<Text>();
+        foreach (var Label in Labels)
+        {
+            if (!Label.name.Contains("Label"))
+            {
+                continue;
+            }
+            Debug.Log(Label);
+        }
+        
     }
 }
