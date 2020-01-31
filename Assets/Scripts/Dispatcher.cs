@@ -22,7 +22,18 @@ public class Dispatcher : MonoBehaviour
 
     public void OnShipClick()
     {
-        if (currentShip == null) // Обычный шаблон
+        if (gameObject.name.Contains("Clone"))
+        {
+            if (currentShip == null)
+            {
+                currentShip = GetComponentInChildren<Ship>();
+            }
+            else if (currentShip.IsPositionCorrect)
+            {
+                currentShip = null;
+            }
+        }
+        else if (currentShip == null) // Обычный шаблон
         {
             var shipObjToPlay = Instantiate(shipPrefab, transform.parent.transform);
             currentShip = shipObjToPlay.GetComponentInChildren<Ship>();

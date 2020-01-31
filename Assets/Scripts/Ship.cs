@@ -16,12 +16,20 @@ public class Ship : MonoBehaviour
     Dispatcher dispatcher;
     bool toMove = false;
     int floorsNum;
+    Animator[] animators;
+    public bool IsWithIn = false;
+    public Vector2 CellCenterPos;
+    bool IsWasLocatedOnse= false;
+    Vector2 LastPosition;
+    Orientation LastOrentation;
+
 
     // Start is called before the first frame update
     void Start()
     {
         canvas = GetComponentInParent<Canvas>();
         floorsNum = transform.childCount;
+        animators = new Animator[floorsNum];
         float floorSize = 0;
         for (int i = 0; i < floorsNum; i++)
         {
@@ -39,6 +47,15 @@ public class Ship : MonoBehaviour
             var buttonScript = floorButtonObj.GetComponent<Button>(); // Задавание кликабельности
             buttonScript.onClick.AddListener(OnFloorClick); // Кликабельность и привязываемость.
             dispatcher = GetComponentInChildren<Dispatcher>();
+            var animator = floor.GetComponent<Animator>();
+            animators[i] = animator;
+        }
+    }
+    void SwitchErrorAnimation()
+    {
+        foreach (var animator in animators)
+        {
+            animator.SetBool("IsMistPlayst",!IsPositionCorrect);
         }
     }
 
@@ -53,11 +70,55 @@ public class Ship : MonoBehaviour
         Daun = canvas.transform.TransformPoint(Daun); // Выше написанное
         transform.position = Daun;// позиция мыши
         GameField.CheckShipPosition(Daun, this);// Чекнуть корабельную позицию через Daun и это
+        if (IsWithIn)
+        {
+            transform.position =CellCenterPos;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            Rotate();
+        }
+        else if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            
+        }
+        SwitchErrorAnimation();
+    }
+
+    void Rotate()
+    {
+        var angle = -90f;
+        if (orientation== Orientation.Horizontal)
+        {
+            orientation = Orientation.Vertical;
+        }
+        else
+        {
+            orientation = Orientation.Horizontal;
+            angle = -angle;
+        }
+        transform.Rotate(new Vector3(0,0,angle),Space.Self);
     }
 
     void OnFloorClick()
     {
+        //Debug.Log("KEK");
+        if (!Input.GetMouseButtonUp(0))
+        {
+            return;
+        }
+        else if (toMove && IsPositionCorrect)
+        {
+            LastPosition = transform.position;
+            LastOrentation = orientation;
+        }
         dispatcher.OnShipClick();
+        if (!IsWasLocatedOnse)
+        {
+            IsWasLocatedOnse = true;
+        }
+        
     }
 
 }
