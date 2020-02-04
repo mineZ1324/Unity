@@ -133,5 +133,10 @@ public class Ship : MonoBehaviour
         }
         
     }
+    public int FloorsNum()
+    {
+        return floorsNum;
+    }
+    
 
 }

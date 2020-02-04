@@ -70,11 +70,33 @@ public class GameField : MonoBehaviour
         int x = (int)(dx/cellSize);
         int y = (int)(dy / cellSize);
         //Debug.Log(x+" , "+y);
-        ship.IsPositionCorrect = true;
+        ship.IsPositionCorrect = IsLocationAppropriate(ship,x,y);
         ship.IsWithIn = true;
         ship.CellCenterPos = BoundsOfCells[x,y].center;
         //Debug.Log(y);
 
     }
-
+    static bool IsLocationAppropriate(Ship ship,int x ,int y)
+    {
+        for (int i = 0; i < ship.FloorsNum(); i++)
+        {
+            if (!IsPointWithinMatrics(x,y))
+            {
+                return false;
+            }
+            if (ship.orientation == Ship.Orientation.Horizontal)
+            {
+                x++;
+            }
+            else //if (ship.orientation == Ship.Orientation.Vertical)
+            {
+                y--;
+            }
+        }
+        return true;
+    }
+    static bool IsPointWithinMatrics(int x, int y)
+    {
+        return x>=0&&y>=0&& x < Width() && y <Heigth();
+    }
 }
