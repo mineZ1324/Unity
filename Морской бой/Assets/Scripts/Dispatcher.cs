@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class Dispatcher : MonoBehaviour
 {
     static Dictionary<string, int> shipsLeftToAllocate = new Dictionary<string, int>();
+    static Dictionary<string, Text> LablesDict = new Dictionary<string, Text>();
+    string DictKey;
     public GameObject shipPrefab;
     public static Ship currentShip;
 
@@ -43,7 +45,8 @@ public class Dispatcher : MonoBehaviour
     }
     void FillLabelsDict()
     {
-        var Labels = transform.parent.GetComponentsInChildren<Text>();
+
+        /*var Labels = transform.parent.GetComponentsInChildren<Text>();
         foreach (var Label in Labels)
         {
             if (!Label.name.Contains("Label"))
@@ -51,7 +54,7 @@ public class Dispatcher : MonoBehaviour
                 continue;
             }
             Debug.Log(Label);
-        }
+        }*/
         
     }
 }
