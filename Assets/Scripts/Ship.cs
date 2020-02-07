@@ -81,7 +81,20 @@ public class Ship : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.Escape))
         {
-            
+            if (IsWasLocatedOnse)
+            {
+                
+                transform.position = LastPosition;
+                Dispatcher.currentShip = null;
+                if (orientation!=LastOrentation)
+                {
+                    Rotate();
+                }
+                else 
+                {
+                    Destroy(gameObject);
+                }
+            }
         }
         SwitchErrorAnimation();
     }
@@ -120,5 +133,10 @@ public class Ship : MonoBehaviour
         }
         
     }
+    public int FloorsNum()
+    {
+        return floorsNum;
+    }
+    
 
 }
