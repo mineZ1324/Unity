@@ -16,6 +16,7 @@ public class GameField : MonoBehaviour
     static Bounds[,] BoundsOfCells;
     static int[,] fieldBody = new int[10, 8];
     static float cellSize;
+    static Vector2 BottomLeftCorner;
 
     // Start is called before the first frame update
     void Start()
@@ -49,12 +50,52 @@ public class GameField : MonoBehaviour
     {
         return fieldBody.GetLength(1);
     }
+    static Vector2 GetCellNormalPos(Vector2 Position)
+    {
+        var dx = Position.x - BottomLeftCorner.x;
+        var dy = Position.y - BottomLeftCorner.y;
+        int x = (int)(dx / cellSize);
+        int y = (int)(dy / cellSize);
+        return new Vector2(x,y);
+    }
+    static void CellStateUnderneathShip(Ship ship,CellState cellState)
+    {
+        Vector2 CellNormalPos = GetCellNormalPos(ship.CellCenterPos);
+        int x = (int)CellNormalPos.x;
+        int y = (int)CellNormalPos.y;
+        for (int i = 0; i < ship.FloorsNum(); i++)
+        {
+            fieldBody[x, y] = (int)cellState;
+            if (ship.orientation == Ship.Orientation.Horizontal)
+            {
+                x++;
+            }
+            else if (ship.orientation == Ship.Orientation.Vertical)
+            {
+                y--;
+            }
+        }
+        for (int i = 0; i < Width(); i++)
+        {
+            string str=" ";
+            for (int j = 0; j <  Heigth(); j++)
+            {
+                str+=fieldBody[i, j]+" ";
+            }
+            Debug.Log(str);
+        }
+    }
+    public static void RegisterShip(Ship ship)
+    {
+        CellStateUnderneathShip(ship,CellState.Occupied);
+    }
 
     public static void CheckShipPosition(Vector3 mousePos, Ship ship)
     {
+        var CellNormalPos = GetCellNormalPos(mousePos);
         var BottomLeftCells = BoundsOfCells[0, 0];
         var UpperRightCells = BoundsOfCells[Width() - 1, Heigth() - 1];
-        var BottomLeftCorner = BottomLeftCells.min;
+        BottomLeftCorner = BottomLeftCells.min;
         var UpperRightCorner = UpperRightCells.max;
         bool IsOverField = mousePos.x>BottomLeftCorner.x && mousePos.y>BottomLeftCorner.y && mousePos.x<UpperRightCorner.x && mousePos.y<UpperRightCorner.y;
 
@@ -64,15 +105,12 @@ public class GameField : MonoBehaviour
             ship.IsWithIn = false;
             return;
         }
-        var dx = mousePos.x-BottomLeftCorner.x;
-        var dy = mousePos.y - BottomLeftCorner.y;
-        
-        int x = (int)(dx/cellSize);
-        int y = (int)(dy / cellSize);
+        int sx = (int)CellNormalPos.x;
+        int sy = (int)CellNormalPos.y;
         //Debug.Log(x+" , "+y);
-        ship.IsPositionCorrect = IsLocationAppropriate(ship,x,y);
+        ship.IsPositionCorrect = IsLocationAppropriate(ship,sx,sy);
         ship.IsWithIn = true;
-        ship.CellCenterPos = BoundsOfCells[x,y].center;
+        ship.CellCenterPos = BoundsOfCells[sx,sy].center;
         //Debug.Log(y);
 
     }

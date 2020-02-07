@@ -19,7 +19,7 @@ public class Ship : MonoBehaviour
     Animator[] animators;
     public bool IsWithIn = false;
     public Vector2 CellCenterPos;
-    bool IsWasLocatedOnse= false;
+    bool WasLocatedOnse = false;
     Vector2 LastPosition;
     Orientation LastOrentation;
 
@@ -81,19 +81,20 @@ public class Ship : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.Escape))
         {
-            if (IsWasLocatedOnse)
+
+            if (WasLocatedOnse)
             {
-                
                 transform.position = LastPosition;
                 Dispatcher.currentShip = null;
                 if (orientation!=LastOrentation)
                 {
                     Rotate();
                 }
-                else 
-                {
-                    Destroy(gameObject);
-                }
+                GameField.RegisterShip(this);
+            }
+            else
+            {
+                Destroy(gameObject);
             }
         }
         SwitchErrorAnimation();
@@ -125,17 +126,22 @@ public class Ship : MonoBehaviour
         {
             LastPosition = transform.position;
             LastOrentation = orientation;
+            GameField.RegisterShip(this);
         }
         dispatcher.OnShipClick();
-        if (!IsWasLocatedOnse)
+        if (IsPositionCorrect)
         {
-            IsWasLocatedOnse = true;
+            WasLocatedOnse = true;
         }
         
     }
     public int FloorsNum()
     {
         return floorsNum;
+    }
+    public bool WAsLocatedOnse()
+    {
+        return WasLocatedOnse;
     }
     
 
