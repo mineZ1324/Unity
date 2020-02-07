@@ -15,7 +15,7 @@ public class Dispatcher : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        IsWorkingInstance = name.Contains("Clone");
+        IsWorkingInstance = name.Contains("(Clone)");
         DictKey = name.Replace("(Clone)", null);
         //Debug.Log(DictKey);
         var floorsNumStr = DictKey.Replace("Ship-", null);

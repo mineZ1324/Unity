@@ -19,7 +19,7 @@ public class Ship : MonoBehaviour
     Animator[] animators;
     public bool IsWithIn = false;
     public Vector2 CellCenterPos;
-    bool IsWasLocatedOnse= false;
+    bool WasLocatedOnse = false;
     Vector2 LastPosition;
     Orientation LastOrentation;
 
@@ -81,7 +81,7 @@ public class Ship : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.Escape))
         {
-            if (IsWasLocatedOnse)
+            if (WasLocatedOnse)
             {
                 
                 transform.position = LastPosition;
@@ -127,9 +127,9 @@ public class Ship : MonoBehaviour
             LastOrentation = orientation;
         }
         dispatcher.OnShipClick();
-        if (!IsWasLocatedOnse)
+        if (!WasLocatedOnse)
         {
-            IsWasLocatedOnse = true;
+            WasLocatedOnse = true;
         }
         
     }
