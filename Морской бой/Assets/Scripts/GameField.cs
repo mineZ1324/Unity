@@ -66,11 +66,11 @@ public class GameField : MonoBehaviour
         for (int i = 0; i < ship.FloorsNum(); i++)
         {
             fieldBody[x, y] = (int)cellState;
-            if (ship.orientation == Ship.Orientation.Horizontal)
+            if (ship.orientation == Ship.Orientation.Vertical)
             {
                 x++;
             }
-            else if (ship.orientation == Ship.Orientation.Vertical)
+            else if (ship.orientation == Ship.Orientation.Horizontal)
             {
                 y--;
             }
@@ -78,7 +78,7 @@ public class GameField : MonoBehaviour
         for (int i = 0; i < Width(); i++)
         {
             string str=" ";
-            for (int j = 0; j <  Heigth(); j++)
+            for (int j = 0; j < Heigth(); j++)
             {
                 str+=fieldBody[i, j]+" ";
             }
