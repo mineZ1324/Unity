@@ -116,11 +116,31 @@ public class GameField : MonoBehaviour
     }
     static bool IsLocationAppropriate(Ship ship,int x ,int y)
     {
+        var dx = new int[]
+        {
+            0,1,1,0,-1,-1,-1,0,1
+        };
+        var dy = new int[]
+        {
+            0,0,-1,-1,-1,0,1,1,1
+        };
+
         for (int i = 0; i < ship.FloorsNum(); i++)
         {
             if (!IsPointWithinMatrics(x,y))
             {
                 return false;
+            }
+            for (int j = 0; j < 9; j++)
+            {
+                var ShiftX = x + dx[j];
+                var ShiftY = y + dy[j];
+                bool IsPosApr = !IsPointWithinMatrics(ShiftX,ShiftY) || fieldBody[ShiftX,ShiftY]!=(int)CellState.Occupied;
+                if (!IsPosApr)
+                {
+                    return false;
+                }
+                
             }
             if (ship.orientation == Ship.Orientation.Horizontal)
             {
@@ -130,6 +150,7 @@ public class GameField : MonoBehaviour
             {
                 y--;
             }
+            
         }
         return true;
     }
