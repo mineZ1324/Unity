@@ -5,32 +5,37 @@ using UnityEngine.UI;
 
 public class Dispatcher : MonoBehaviour
 {
-    static Dictionary<string, int> shipsLeftToAllocate = new Dictionary<string, int>();
-    static Dictionary<string, Text> LablesDict = new Dictionary<string, Text>();
-    string DictKey;
     public GameObject shipPrefab;
     public static Ship currentShip;
-    bool IsWorkingInstance=true;
+
+    string dictKey;
+    bool isWorkingInstance = true;
+
+    static Dictionary<string, int> shipsLeftToAllocate = new Dictionary<string, int>();
+    static Dictionary<string, Text> lablesDict = new Dictionary<string, Text>();
+    static List<Dispatcher> allShips = new List<Dispatcher>();
+    static bool isAutoCreation = false;
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
-        IsWorkingInstance = name.Contains("(Clone)");
-        DictKey = name.Replace("(Clone)", null);
-        //Debug.Log(DictKey);
-        var floorsNumStr = DictKey.Replace("Ship-", null);
+        isWorkingInstance = name.Contains("(Clone)");
+        dictKey = name.Replace("(Clone)", null);
+        if (!isAutoCreation) allShips.Add(this);
+
+        var floorsNumStr = dictKey.Replace("Ship-", null);
         var shipsToAllocate = 5 - int.Parse(floorsNumStr);
-        if (!shipsLeftToAllocate.ContainsKey(DictKey))
+        if (!shipsLeftToAllocate.ContainsKey(dictKey))
         {
-            shipsLeftToAllocate.Add(DictKey, shipsToAllocate);
+            shipsLeftToAllocate.Add(dictKey, shipsToAllocate);
             FillLabelsDict();
         }
-        ReFreshLabel();
+        RefreshLabel();
     }
 
-    public void OnShipClick()
+    protected void OnShipClick()
     {   
-        if (IsWorkingInstance)
+        if (isWorkingInstance)
         {
             if (currentShip == null)
             {
@@ -40,13 +45,13 @@ public class Dispatcher : MonoBehaviour
             {
                 if (!currentShip.WAsLocatedOnse())
                 {
-                    shipsLeftToAllocate[DictKey]--;
-                    ReFreshLabel();
+                    shipsLeftToAllocate[dictKey]--;
+                    RefreshLabel();
                 }
                 currentShip = null;
             }
         }
-        else if (currentShip == null&&shipsLeftToAllocate[DictKey]>0) // Обычный шаблон
+        else if (currentShip == null&&shipsLeftToAllocate[dictKey]>0) // Обычный шаблон
         {
             var shipObjToPlay = Instantiate(shipPrefab, transform.parent.transform);
             currentShip = shipObjToPlay.GetComponentInChildren<Ship>();
@@ -54,9 +59,9 @@ public class Dispatcher : MonoBehaviour
     }
     void FillLabelsDict()
     {
-        var LabelObj = GameObject.Find(DictKey+"(Label)");
+        var LabelObj = GameObject.Find(dictKey+"(Label)");
         var Label = LabelObj.GetComponent<Text>();
-        LablesDict.Add(DictKey, Label);
+        lablesDict.Add(dictKey, Label);
         /*var Labels = transform.parent.GetComponentsInChildren<Text>();
         foreach (var Label in Labels)
         {
@@ -67,8 +72,34 @@ public class Dispatcher : MonoBehaviour
             Debug.Log(Label);
         }*/
     }
-    void ReFreshLabel()
+    void RefreshLabel()
     {
-        LablesDict[DictKey].text = shipsLeftToAllocate[DictKey]+"x";
+        lablesDict[dictKey].text = shipsLeftToAllocate[dictKey]+"x";
+    }
+
+    static Dispatcher[] GetAllShipsOfType(bool templateOnes)
+    {
+        var result = new List<Dispatcher>();
+        foreach (var ship in allShips)
+            if (ship.isWorkingInstance ^ templateOnes) result.Add(ship);
+        return result.ToArray();
+    }
+
+    public static Dispatcher[] CreateAllShips()
+    {
+        isAutoCreation = true;
+        var templateShips = GetAllShipsOfType(true);
+        foreach (var tmplShip in templateShips) tmplShip.CreateAllClonesOfType();
+        return GetAllShipsOfType(false);
+    }
+
+    void CreateAllClonesOfType()
+    {
+        for (int i = 0; i < shipsLeftToAllocate[dictKey]; i++)
+        {
+            var ship = Instantiate(shipPrefab, transform.parent.transform);
+            allShips.Add(ship.GetComponent<Dispatcher>());
+        }
+        shipsLeftToAllocate[dictKey] = 0;
     }
 }

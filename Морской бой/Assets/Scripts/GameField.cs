@@ -5,94 +5,95 @@ using UnityEngine.UI;
 
 public class GameField : MonoBehaviour
 {
-    GameObject[,] asd = new GameObject[10,10];
     public enum CellState
     {
         Empty, Misdelivered, Occupied, Misplaced, Hit
     }
-
-
+    
     public GameObject cellPrefab;
-    public float bottomLeftX, bottomLeftY;
-    static Bounds[,] BoundsOfCells;
-    static int[,] fieldBody = new int[10, 10];
-    static float cellSize;
-    static Vector2 BottomLeftCorner;
+    public Vector2 originBottomLeft;
+    protected static Bounds[,] boundsOfCells;
+    protected static float cellSize;
+    static Vector2 bottomLeftCellStartCorner;
+
+    GameObject origin;
+    protected string originObjName = "GameFieldOrigin";
+    protected static CellState[,] body = new CellState[10, 10];
+
 
     // Start is called before the first frame update
     void Start()
     {
+        origin = GameObject.Find(originObjName);
+        origin.transform.position = originBottomLeft;
+
         var sprRenderer = cellPrefab.GetComponent<SpriteRenderer>();
         cellSize = sprRenderer.bounds.size.x;
-        BoundsOfCells = new Bounds[Width(), High()];
+        boundsOfCells = new Bounds[Width(), Height()];
         GenerateField();
     }
 
     void GenerateField()
     {
-        for (int i = 0; i < Width(); i++)
-        {
-            for (int j = 0; j < High(); j++)
-            {
-                var cellPos = new Vector2(bottomLeftX + i * cellSize, bottomLeftY + j * cellSize);
-                asd[i,j] = Instantiate(cellPrefab, cellPos, Quaternion.identity);
-                var CellBounds = new Bounds(cellPos, new Vector2(cellSize, cellSize));
-                BoundsOfCells[i, j] = CellBounds;
-            }
-        }
-    }
-     void Update()
-    {
-        for (int i = 0; i < Width(); i++)
-        {
-            for (int j = 0; j < High(); j++)
-            {
-                Destroy(asd[i, j]);
-            }
-        }
-        GenerateField();
+        for (int x = 0; x < Width(); x++) GenerateFieldColumn(x);
     }
 
-    static int Width()
+    void GenerateFieldColumn(int x)
     {
-        return fieldBody.GetLength(0);
+        for (int y = 0; y < Height(); y++) OnGenerateCell(x, y);
     }
 
-    static int High()
+    void OnGenerateCell(int x, int y)
     {
-        return fieldBody.GetLength(1);
+        var cellPos = new Vector2(originBottomLeft.x + x * cellSize,
+            originBottomLeft.y + y * cellSize);
+        var cell = Instantiate(cellPrefab, cellPos, Quaternion.identity);
+        cell.transform.SetParent(origin.transform);
+        var CellBounds = new Bounds(cellPos, new Vector2(cellSize, cellSize));
+        boundsOfCells[x, y] = CellBounds;
+    }
+
+
+    void Update()
+    {
+        origin.transform.position = originBottomLeft;
+    }
+
+    protected static int Width()
+    {
+        return body.GetLength(0);
+    }
+
+    protected static int Height()
+    {
+        return body.GetLength(1);
     }
     static Vector2 GetCellNormalPos(Vector2 Position)
     {
-        var dx = Position.x - BottomLeftCorner.x;
-        var dy = Position.y - BottomLeftCorner.y;
+        var dx = Position.x - bottomLeftCellStartCorner.x;
+        var dy = Position.y - bottomLeftCellStartCorner.y;
         int x = (int)(dx / cellSize);
         int y = (int)(dy / cellSize);
         return new Vector2(x,y);
     }
     static void CellStateUnderneathShip(Ship ship,CellState cellState)
     {
-        Vector2 CellNormalPos = GetCellNormalPos(ship.CellCenterPos);
+        Vector2 CellNormalPos = GetCellNormalPos(ship.cellCenterPos);
         int x = (int)CellNormalPos.x;
         int y = (int)CellNormalPos.y;
         for (int i = 0; i < ship.FloorsNum(); i++)
         {
-            fieldBody[x, y] = (int)cellState;
-            if (ship.orientation == Ship.Orientation.Horizontal)
-            {
-                x++;
-            }
-            else if (ship.orientation == Ship.Orientation.Vertical)
-            {
-                y--;
-            }
+            body[x, y] = cellState;
+            if (ship.orientation == Ship.Orientation.Horizontal) x++;
+            else if (ship.orientation == Ship.Orientation.Vertical) y--;
         }
+
         for (int i = 0; i < Width(); i++)
         {
             string str=" ";
-            for (int j = 0; j <  High(); j++)
+            for (int j = 0; j <  Height(); j++)
             {
-                str+=fieldBody[i, j]+" ";
+                str+=body[i, j]+" ";
             }
             Debug.Log(str);
         }
@@ -105,11 +106,11 @@ public class GameField : MonoBehaviour
     public static void CheckShipPosition(Vector3 mousePos, Ship ship)
     {
         var CellNormalPos = GetCellNormalPos(mousePos);
-        var BottomLeftCells = BoundsOfCells[0, 0];
-        var UpperRightCells = BoundsOfCells[Width() - 1, High() - 1];
-        BottomLeftCorner = BottomLeftCells.min;
+        var BottomLeftCells = boundsOfCells[0, 0];
+        var UpperRightCells = boundsOfCells[Width() - 1, Height() - 1];
+        bottomLeftCellStartCorner = BottomLeftCells.min;
         var UpperRightCorner = UpperRightCells.max;
-        bool IsOverField = mousePos.x>BottomLeftCorner.x && mousePos.y>BottomLeftCorner.y && mousePos.x<UpperRightCorner.x && mousePos.y<UpperRightCorner.y;
+        bool IsOverField = mousePos.x>bottomLeftCellStartCorner.x && mousePos.y>bottomLeftCellStartCorner.y && mousePos.x<UpperRightCorner.x && mousePos.y<UpperRightCorner.y;
 
         if (!IsOverField)//Кораблик за пределами поля
         {
@@ -122,7 +123,7 @@ public class GameField : MonoBehaviour
         //Debug.Log(x+" , "+y);
         ship.IsPositionCorrect = IsLocationAppropriate(ship,sx,sy);
         ship.IsWithIn = true;
-        ship.CellCenterPos = BoundsOfCells[sx,sy].center;
+        ship.cellCenterPos = boundsOfCells[sx,sy].center;
         //Debug.Log(y);
 
     }
@@ -147,6 +148,6 @@ public class GameField : MonoBehaviour
     }
     static bool IsPointWithinMatrics(int x, int y)
     {
-        return x>=0&&y>=0&& x < Width() && y <High();
+        return x>=0&&y>=0&& x < Width() && y <Height();
     }
 }
